@@ -21,20 +21,20 @@ package adlib.utils {
 		private var touchAreaOuter:TouchArea;
 		
 		private var _enabled:Boolean;
-		private var _upFrame:int;
-		private var _downFrame:int;
+		private var _upFrame:*;
+		private var _downFrame:*;
 		private var _isReleasing:Boolean;
 		
 		public function Button(clip:MovieClip, doThis:Function = null) {
 			this.clip = clip;
 			this.doThis = doThis;
-			enabled = true;
 			
 			_upFrame = 1;
 			_downFrame = 2;
+			enabled = true;
 		}
 		
-		public function setFrames(upFrame:int, downFrame:int):void {
+		public function setFrames(upFrame:*, downFrame:*):void {
 			_upFrame = upFrame;
 			_downFrame = downFrame;
 			update();
@@ -97,15 +97,16 @@ package adlib.utils {
 					if (clickDownSound != null) {
 						Sounds.sharedInstance().playSound(clickDownSound,'click',0.1);
 					}
-					clip.gotoAndStop(_downFrame);
+					applyFrame(clip, _downFrame);
 				}
 			} else {
-				clip.gotoAndStop(_upFrame);
+				applyFrame(clip, _upFrame);
 			}
 		}
+		
 
 		private function handleRelease(touchArea:TouchArea):void {
-			clip.gotoAndStop(_upFrame);
+			applyFrame(clip, _upFrame);
 			if (!_isReleasing) {
 				if (_enabled && isObjectVisible(clip) && touchAreaInner.isTouched && touchAreaOuter.isTouchOver) {
 					_isReleasing = true;
@@ -123,6 +124,14 @@ package adlib.utils {
 						_isReleasing = false;
 					}
 				}
+			}
+		}
+
+		private function applyFrame(clip:MovieClip, frame:*):void {
+			if (frame is int || frame is String) {
+				clip.gotoAndStop(frame);
+			} else if (frame is Function) {
+				frame(clip);
 			}
 		}
 
